@@ -11,42 +11,42 @@ void SetConsoleUTF8() {
 	SetConsoleOutputCP(65001);
 }
 
-enum PieceType {
-	EMPTY,
-	GENERAL,
-	ADVISOR,
-	ELEPHANT,
-	HORSE,
-	CHARIOT,
-	CANNON,
-	SOLDIER
+enum PieceType {//棋子枚举类
+	EMPTY,//空，代表无棋子
+	GENERAL,//将
+	ADVISOR,//士
+	ELEPHANT,//象
+	HORSE,//马
+	CHARIOT,//车
+	CANNON,//炮
+	SOLDIER//兵
 };
 
-enum PieceColor {
-	NONE,
-	RED,
-	BLACK
+enum PieceColor {//棋子颜色
+	NONE,//空
+	RED,//红
+	BLACK//黑
 };
 
-struct Piece {
-	PieceType type;
-	PieceColor color;
-	wstring symbol;
+struct Piece {//棋子结构体
+	PieceType type;//棋子的类型, 这里对应棋子枚举类
+	PieceColor color;//棋子颜色
+	wstring symbol;//宽字符串，用来标识
 };
 
 class ChessBoard {
 private:
-	vector<vector<Piece>> board;
-	bool redTurn;
-	bool gameOver;
+	vector<vector<Piece>> board;//用vector容器来表示每个每个十字交叉点的位置
+	bool redTurn;//是否为红色回合
+	bool gameOver;//是否游戏结束
 	
 public:
-	ChessBoard() : redTurn(true), gameOver(false) {
-		board.resize(10, vector<Piece>(9, {EMPTY, NONE, L"　"}));
+	ChessBoard() : redTurn(true), gameOver(false) {//初始化方法，初始化为红色优先，游戏结束为假
+		board.resize(10, vector<Piece>(9, {EMPTY, NONE, L"　"}));//初始化十行，每行九个piece结构体
 		initializeBoard();
 	}
 	
-	void initializeBoard() {
+	void initializeBoard() {//这个函数用来把每个棋子放到开局的位置
 		board[9][0] = {CHARIOT, RED, L"俥"};
 		board[9][1] = {HORSE, RED, L"傌"};
 		board[9][2] = {ELEPHANT, RED, L"相"};
@@ -82,7 +82,7 @@ public:
 		}
 	}
 	
-	void printBoard(){
+	void printBoard(){//打印棋盘
 		wcout<<L"  ";
 		for(int j=0;j<9;++j){
 			wcout<<j<<L" ";
@@ -99,34 +99,34 @@ public:
 		wcout<<(redTurn?L"红方":L"黑方")<<L"回合"<<endl;
 	}
 	
-	bool isValidMove(int fromX,int fromY,int toX,int toY){
+	bool isValidMove(int fromX,int fromY,int toX,int toY){//验证棋子移动是否合法
 		if(fromX<0||fromX>=10||fromY<0||fromY>=9||
 			toX<0||toX>=10||toY<0||toY>=9){
 			wcout<<L"移动超出棋盘范围！"<<endl;
 			return false;
 		}
 		
-		Piece fromPiece=board[fromX][fromY];
-		Piece toPiece=board[toX][toY];
+		Piece fromPiece=board[fromX][fromY];//将来源点接收
+		Piece toPiece=board[toX][toY];//将目的点接收
 		
-		if(fromPiece.type==EMPTY){
+		if(fromPiece.type==EMPTY){//如果选中的来源点的type类型为空，即未选中
 			wcout<<L"没有选中棋子！"<<endl;
 			return false;
 		}
 		
-		if((redTurn&&fromPiece.color!=RED)||(!redTurn&&fromPiece.color!=BLACK)){
+		if((redTurn&&fromPiece.color!=RED)||(!redTurn&&fromPiece.color!=BLACK)){//如果红色回合选中黑色或反之，不合法
 			wcout<<L"请选择自己的棋子！"<<endl;
 			return false;
 		}
 		
-		if(toPiece.color==fromPiece.color){
+		if(toPiece.color==fromPiece.color){//两个棋子颜色相同也不合法
 			wcout<<L"不能吃自己的棋子！"<<endl;
 			return false;
 		}
 		
-		switch(fromPiece.type){
-			case GENERAL:
-				if(redTurn){
+		switch(fromPiece.type){//这个switch用来判断每个单独的棋子是否合法
+			case GENERAL://将
+				if(redTurn){//这里首先判断移动是否超界
 					if(toX<7||toX>9||toY<3||toY>5){
 						wcout<<L"将/帅只能在九宫格内移动！"<<endl;
 						return false;
@@ -138,9 +138,9 @@ public:
 					}
 				}
 				
-				if(abs(fromX-toX)+abs(fromY-toY)!=1){
+				if(abs(fromX-toX)+abs(fromY-toY)!=1){//这里利用x,y相减相加的和判断将是否只移动了一格
 					if(fromY==toY){
-						bool hasPieceBetween=false;
+						bool hasPieceBetween=false;//判断是否面将
 						int start=min(fromX,toX)+1;
 						int end=max(fromX,toX)-1;
 						for(int i=start;i<=end;++i){
@@ -158,7 +158,7 @@ public:
 				}
 				break;
 				
-			case ADVISOR:
+			case ADVISOR://士的判断
 				if(redTurn){
 					if(toX<7||toX>9||toY<3||toY>5){
 						wcout<<L"士只能在九宫格内移动！"<<endl;
@@ -177,7 +177,7 @@ public:
 				}
 				break;
 				
-			case ELEPHANT:
+			case ELEPHANT://象
 				if(abs(fromX-toX)!=2||abs(fromY-toY)!=2){
 					wcout<<L"象必须走田字！"<<endl;
 					return false;
@@ -200,7 +200,7 @@ public:
 				}
 				break;
 				
-			case HORSE:
+			case HORSE://马
 				if(!((abs(fromX-toX)==2&&abs(fromY-toY)==1)&&
 					!((abs(fromX-toX)==1&&abs(fromY-toY)==2))){
 					wcout<<L"马必须走日字！"<<endl;
@@ -228,7 +228,7 @@ public:
 					return false;
 				}
 				
-				if(fromX==toX){
+				if(fromX==toX){//判断阻挡
 					int start=min(fromY,toY)+1;
 					int end=max(fromY,toY)-1;
 					for(int y=start;y<=end;++y){
@@ -249,7 +249,7 @@ public:
 				}
 				break;
 				
-			case CANNON:
+			case CANNON://炮
 				if(fromX!=toX&&fromY!=toY){
 					wcout<<L"炮必须走直线！"<<endl;
 					return false;
@@ -335,15 +335,15 @@ public:
 			return;
 		}
 		
-		if(board[toX][toY].type==GENERAL){
+		if(board[toX][toY].type==GENERAL){//如果移动合法并且目的地的将类型，游戏获胜
 			gameOver=true;
 			wcout<<(redTurn?L"红方":L"黑方")<<L"获胜！"<<endl;
 		}
 		
-		board[toX][toY]=board[fromX][fromY];
+		board[toX][toY]=board[fromX][fromY];//移动，并将源点置空
 		board[fromX][fromY]={EMPTY,NONE,L"　"};
 		
-		redTurn=!redTurn;
+		redTurn=!redTurn;//回合反转
 	}
 	
 	bool isGameOver()const{
@@ -356,16 +356,16 @@ public:
 };
 
 int main(){
-	SetConsoleUTF8();
+	SetConsoleUTF8();//设置控制台编码
 	
-	ChessBoard game;
+	ChessBoard game;//新建一个棋盘类，调用构造函数
 	
 	wcout<<L"中国象棋游戏"<<endl;
 	wcout<<L"输入格式：起始行 起始列 目标行 目标列（例如：9 0 8 0）"<<endl;
-	wcout<<L"输入'q'退出游戏"<<endl;
+	wcout<<L"输入'q'退出游戏"<<endl;//打印菜单
 	
-	while(!game.isGameOver()){
-		game.printBoard();
+	while(!game.isGameOver()){//游戏开始循环
+		game.printBoard();//打印棋盘
 		
 		wstring input;
 		wcout<<L"请输入你的走法：";
@@ -377,11 +377,11 @@ int main(){
 		}
 		
 		int fromX,fromY,toX,toY;
-		try{
-			fromX=stoi(input);
+		try{//尝试运行，如果报错就是输入有误
+			fromX=stoi(input);//输入
 			wcin>>fromY>>toX>>toY;
 			
-			game.movePiece(fromX,fromY,toX,toY);
+			game.movePiece(fromX,fromY,toX,toY);//移动棋子
 		}catch(...){
 			wcout<<L"输入无效，请重新输入！"<<endl;
 			wcin.clear();
